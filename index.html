@@ -86,6 +86,19 @@
     .app-controls { display: none; }
     .app-file { font-size: 11px; }
   }
+  #access-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); }
+  .modal-box { position: relative; background: #141414; border: 0.5px solid #2a2a2a; border-radius: 16px; padding: 2rem; width: 90%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,0.6); }
+  .modal-box h3 { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 0.4rem; letter-spacing: -0.3px; }
+  .modal-box p { font-size: 13px; color: #666; margin-bottom: 1.25rem; line-height: 1.6; }
+  .modal-input { width: 100%; background: #1a1a1a; border: 0.5px solid #333; border-radius: 8px; padding: 11px 14px; color: #e8e8e8; font-size: 15px; outline: none; letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .modal-input:focus { border-color: #4a9eff; }
+  .modal-error { font-size: 13px; color: #ff5f57; min-height: 20px; margin-bottom: 1rem; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-cancel { background: transparent; color: #666; border: 0.5px solid #333; padding: 9px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  .modal-submit { background: #4a9eff; color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .modal-cancel:hover { color: #aaa; border-color: #555; }
+  .modal-submit:hover { background: #3a8eef; }
 </style>
 </head>
 <body>
@@ -242,5 +255,69 @@
   </div>
 </footer>
 
+
+<div id="access-modal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <h3>Enter access code</h3>
+    <p>VideoTrimmer is in private beta. Enter your access code to download.</p>
+    <input id="modal-input" class="modal-input" type="text" placeholder="Access code" autocomplete="off" spellcheck="false" />
+    <div id="modal-error" class="modal-error"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-submit" id="modal-submit">Download</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CORRECT_CODE = 'BETA2026';
+  let pendingUrl = null;
+
+  function openModal(url) {
+    pendingUrl = url;
+    document.getElementById('modal-input').value = '';
+    document.getElementById('modal-error').textContent = '';
+    const modal = document.getElementById('access-modal');
+    modal.style.display = 'flex';
+    document.getElementById('modal-input').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('access-modal').style.display = 'none';
+    pendingUrl = null;
+  }
+
+  function attemptDownload() {
+    const val = document.getElementById('modal-input').value.trim();
+    if (val.toUpperCase() === CORRECT_CODE) {
+      closeModal();
+      const a = document.createElement('a');
+      a.href = pendingUrl;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      document.getElementById('modal-error').textContent = 'Invalid code — request access below';
+      document.getElementById('modal-input').focus();
+    }
+  }
+
+  document.querySelectorAll('a[download]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal(el.href);
+    });
+  });
+
+  document.getElementById('modal-submit').addEventListener('click', attemptDownload);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') attemptDownload();
+    if (e.key === 'Escape') closeModal();
+  });
+  document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+</script>
 </body>
 </html>
