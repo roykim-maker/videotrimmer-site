@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VideoTrimmer — Cut long videos down to size</title>
+<title>ClipTrim — Cut long videos down to size</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234a9eff'/><path d='M8 10h10M8 16h16M8 22h12' stroke='white' stroke-width='2.5' stroke-linecap='round'/><path d='M22 13l4 3-4 3V13z' fill='white'/></svg>">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  button { font-family: inherit; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e8e8e8; line-height: 1.6; }
   a { color: inherit; text-decoration: none; }
+
   nav { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 0.5px solid #222; position: sticky; top: 0; background: #0a0a0aee; backdrop-filter: blur(8px); z-index: 100; }
-  .nav-logo { font-size: 15px; font-weight: 500; letter-spacing: -0.3px; color: #fff; }
-  .nav-logo span { color: #4a9eff; }
-  .nav-cta { background: #4a9eff; color: #fff; border: none; padding: 7px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-block; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo svg { width: 32px; height: 32px; }
+  .nav-logo-text { font-size: 16px; font-weight: 600; letter-spacing: -0.5px; color: #fff; }
+  .nav-logo-text span { color: #4a9eff; }
+  .nav-cta { background: #4a9eff; color: #fff; border: none; padding: 7px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+
   .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 700px; margin: 0 auto; }
   .hero-badge { display: inline-block; background: #1a2a3a; color: #4a9eff; font-size: 12px; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.5rem; border: 0.5px solid #2a4a6a; }
   .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 600; line-height: 1.15; letter-spacing: -1px; color: #fff; margin-bottom: 1.25rem; }
@@ -20,15 +24,14 @@
   .hero p { font-size: 17px; color: #888; max-width: 500px; margin: 0 auto 2.5rem; line-height: 1.7; }
   .hero-actions { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
   .btn-primary { background: #4a9eff; color: #fff; border: none; padding: 13px 28px; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-  .btn-secondary { background: transparent; color: #888; border: 0.5px solid #333; padding: 13px 24px; border-radius: 10px; font-size: 15px; cursor: pointer; }
+  .btn-secondary { background: transparent; color: #4a9eff; border: 1px solid #2a4a6a; padding: 13px 24px; border-radius: 10px; font-size: 15px; cursor: pointer; font-weight: 500; }
   .hero-meta { margin-top: 1rem; font-size: 13px; color: #555; }
+
   .app-preview { margin: 3rem auto; max-width: 860px; padding: 0 2rem; }
   .app-window { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 14px; overflow: hidden; }
   .app-titlebar { background: #1a1a1a; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid #2a2a2a; }
   .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot-r { background: #ff5f57; }
-  .dot-y { background: #febc2e; }
-  .dot-g { background: #28c840; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
   .titlebar-name { flex: 1; text-align: center; font-size: 13px; color: #555; }
   .app-toolbar { background: #161616; padding: 8px 16px; display: flex; align-items: center; gap: 16px; border-bottom: 0.5px solid #222; font-size: 13px; flex-wrap: wrap; }
   .app-open-btn { background: #2a2a2a; color: #aaa; border: 0.5px solid #333; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
@@ -38,23 +41,21 @@
   .app-export { background: #1a3a5a; color: #4a9eff; border: 0.5px solid #2a4a6a; padding: 4px 12px; border-radius: 6px; font-size: 12px; }
   .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 14px; }
   .seg-card { background: #1a1a1a; border-radius: 8px; overflow: hidden; border: 2px solid; }
-  .seg-card.green { border-color: #28c840; }
-  .seg-card.amber { border-color: #febc2e; }
-  .seg-card.red { border-color: #ff5f57; }
-  .seg-thumb { height: 72px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .seg-card.green { border-color: #28c840; } .seg-card.amber { border-color: #febc2e; } .seg-card.red { border-color: #ff5f57; }
+  .seg-thumb { height: 72px; }
   .seg-thumb.t1 { background: linear-gradient(135deg, #1a3a5a, #2a5a8a); }
   .seg-thumb.t2 { background: linear-gradient(135deg, #2a1a3a, #4a2a6a); }
   .seg-thumb.t3 { background: linear-gradient(135deg, #1a3a2a, #2a5a3a); }
   .seg-thumb.t4 { background: linear-gradient(135deg, #3a2a1a, #6a4a2a); }
   .seg-info { padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; }
-  .seg-dur { font-size: 11px; color: #888; }
-  .seg-stars { font-size: 10px; color: #febc2e; }
+  .seg-dur { font-size: 11px; color: #888; } .seg-stars { font-size: 10px; color: #febc2e; }
   .seg-check { padding: 4px 8px; font-size: 11px; color: #555; }
   .app-footer { background: #111; border-top: 0.5px solid #222; padding: 8px 16px; display: flex; align-items: center; gap: 12px; font-size: 12px; }
   .footer-dur { color: #888; white-space: nowrap; }
   .footer-bar-wrap { flex: 1; height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
   .footer-bar { height: 100%; background: #28c840; width: 62%; border-radius: 3px; }
   .footer-auto { background: #1a2a1a; color: #28c840; border: 0.5px solid #2a4a2a; padding: 4px 10px; border-radius: 6px; font-size: 11px; white-space: nowrap; }
+
   .steps { padding: 5rem 2rem; max-width: 860px; margin: 0 auto; }
   .section-label { font-size: 12px; color: #4a9eff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.75rem; }
   .section-title { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; color: #fff; margin-bottom: 3rem; letter-spacing: -0.5px; }
@@ -63,12 +64,14 @@
   .step-num { width: 32px; height: 32px; border-radius: 8px; background: #1a2a3a; color: #4a9eff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; margin-bottom: 1rem; border: 0.5px solid #2a4a6a; }
   .step-card h3 { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 0.5rem; }
   .step-card p { font-size: 13px; color: #666; line-height: 1.6; }
+
   .features { padding: 2rem 2rem 5rem; max-width: 860px; margin: 0 auto; }
   .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
   .feat-card { background: #111; border: 0.5px solid #222; border-radius: 12px; padding: 1.25rem; }
-  .feat-icon { font-size: 20px; margin-bottom: 0.75rem; }
+  .feat-icon { width: 36px; height: 36px; margin-bottom: 0.75rem; }
   .feat-card h4 { font-size: 14px; font-weight: 500; color: #fff; margin-bottom: 0.25rem; }
   .feat-card p { font-size: 12px; color: #555; line-height: 1.5; }
+
   .download { padding: 5rem 2rem; text-align: center; border-top: 0.5px solid #1a1a1a; }
   .download h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; color: #fff; margin-bottom: 0.75rem; letter-spacing: -0.5px; }
   .download p { color: #666; margin-bottom: 2rem; font-size: 15px; }
@@ -79,34 +82,89 @@
   .email-form input::placeholder { color: #555; }
   .email-form button { background: #1a2a3a; color: #4a9eff; border: 0.5px solid #2a4a6a; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
   .email-label { font-size: 12px; color: #444; margin-bottom: 0.5rem; }
+
   footer { border-top: 0.5px solid #1a1a1a; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { display: flex; align-items: center; gap: 8px; }
+  .footer-logo svg { width: 24px; height: 24px; }
+  .footer-logo-text { font-size: 14px; font-weight: 600; color: #444; }
+  .footer-logo-text span { color: #2a5a8a; }
   footer p { font-size: 13px; color: #444; }
   .footer-links { display: flex; gap: 1.5rem; font-size: 13px; color: #444; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: #141414; border: 0.5px solid #2a2a2a; border-radius: 16px; padding: 2rem; width: 100%; max-width: 460px; position: relative; }
+  .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #555; font-size: 20px; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: #aaa; }
+  .modal h2 { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+  .modal p { font-size: 13px; color: #666; margin-bottom: 1.5rem; }
+  .modal-field { margin-bottom: 1rem; }
+  .modal-field label { display: block; font-size: 12px; color: #888; margin-bottom: 0.4rem; }
+  .modal-field input, .modal-field textarea { width: 100%; background: #1a1a1a; border: 0.5px solid #333; border-radius: 8px; padding: 10px 14px; color: #e8e8e8; font-size: 14px; outline: none; font-family: inherit; }
+  .modal-field input:focus, .modal-field textarea:focus { border-color: #4a9eff; }
+  .modal-field textarea { resize: vertical; min-height: 90px; }
+  .modal-field input::placeholder, .modal-field textarea::placeholder { color: #444; }
+  .modal-submit { width: 100%; background: #4a9eff; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 0.5rem; }
+  .modal-submit:hover { background: #3a8eef; }
+  .modal-submit:disabled { background: #2a4a6a; color: #666; cursor: not-allowed; }
+  .modal-success { text-align: center; padding: 1rem 0; }
+  .modal-success-icon { font-size: 40px; margin-bottom: 1rem; }
+  .modal-success h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+  .modal-success p { font-size: 14px; color: #666; }
+
   @media (max-width: 600px) {
     .app-grid { grid-template-columns: repeat(2, 1fr); }
     .app-controls { display: none; }
     .app-file { font-size: 11px; }
   }
-  #access-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; }
-  .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); }
-  .modal-box { position: relative; background: #141414; border: 0.5px solid #2a2a2a; border-radius: 16px; padding: 2rem; width: 90%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,0.6); }
-  .modal-box h3 { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 0.4rem; letter-spacing: -0.3px; }
-  .modal-box p { font-size: 13px; color: #666; margin-bottom: 1.25rem; line-height: 1.6; }
-  .modal-input { width: 100%; background: #1a1a1a; border: 0.5px solid #333; border-radius: 8px; padding: 11px 14px; color: #e8e8e8; font-size: 15px; outline: none; letter-spacing: 1px; margin-bottom: 0.5rem; }
-  .modal-input:focus { border-color: #4a9eff; }
-  .modal-error { font-size: 13px; color: #ff5f57; min-height: 20px; margin-bottom: 1rem; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-  .modal-cancel { background: transparent; color: #666; border: 0.5px solid #333; padding: 9px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; }
-  .modal-submit { background: #4a9eff; color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
-  .modal-cancel:hover { color: #aaa; border-color: #555; }
-  .modal-submit:hover { background: #3a8eef; }
 </style>
 </head>
 <body>
 
+<!-- Beta Access Modal -->
+<div class="modal-overlay" id="betaModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-form-view">
+      <h2>Request beta access</h2>
+      <p>Tell us a bit about yourself and how you plan to use ClipTrim. We'll send you a download code within 24 hours.</p>
+      <form id="betaForm">
+        <div class="modal-field">
+          <label>Full name</label>
+          <input type="text" name="name" placeholder="Your name" required />
+        </div>
+        <div class="modal-field">
+          <label>Email address</label>
+          <input type="email" name="email" placeholder="your@email.com" required />
+        </div>
+        <div class="modal-field">
+          <label>How do you plan to use ClipTrim?</label>
+          <textarea name="purpose" placeholder="e.g. I edit YouTube content for clients and need to cut 1-hour recordings down to 15-minute highlights..." required></textarea>
+        </div>
+        <button type="submit" class="modal-submit" id="submitBtn">Send request</button>
+      </form>
+    </div>
+    <div id="modal-success-view" class="modal-success" style="display:none;">
+      <div class="modal-success-icon">✅</div>
+      <h3>Request received!</h3>
+      <p>Thanks for your interest. We'll review your application and send your beta access code within 24 hours.</p>
+    </div>
+  </div>
+</div>
+
 <nav>
-  <div class="nav-logo">Video<span>Trimmer</span></div>
-  <button class="nav-cta" data-download>Download for macOS</button>
+  <div class="nav-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#4a9eff"/>
+      <path d="M7 10h11" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M7 16h17" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M7 22h13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M21 13l5 3-5 3V13z" fill="white"/>
+    </svg>
+    <div class="nav-logo-text">Clip<span>Trim</span></div>
+  </div>
+  <button class="nav-cta" onclick="window.open('https://github.com/roykim-maker/video-trimmer/releases/tag/v1.0.0')">Download for macOS</button>
 </nav>
 
 <section class="hero">
@@ -114,11 +172,11 @@
   <h1>Cut long videos<br>down to size, <em>automatically</em></h1>
   <p>AI-powered scene detection helps video editors trim hours of footage to a target length in minutes — all processed locally on your machine.</p>
   <div class="hero-actions">
-    <button class="btn-primary" data-download>
+    <button class="btn-primary" onclick="window.open('https://github.com/roykim-maker/video-trimmer/releases/tag/v1.0.0')">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 8l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download for macOS
     </button>
-    <button class="btn-secondary">View on GitHub</button>
+    <button class="btn-secondary" onclick="openModal()">Request beta access</button>
   </div>
   <p class="hero-meta">405 MB · macOS 11+ · Free during beta</p>
 </section>
@@ -126,10 +184,8 @@
 <div class="app-preview">
   <div class="app-window">
     <div class="app-titlebar">
-      <div class="dot dot-r"></div>
-      <div class="dot dot-y"></div>
-      <div class="dot dot-g"></div>
-      <div class="titlebar-name">Video Segment Editor</div>
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <div class="titlebar-name">ClipTrim</div>
     </div>
     <div class="app-toolbar">
       <div class="app-open-btn">Open…</div>
@@ -142,26 +198,10 @@
       <div class="app-export">Export…</div>
     </div>
     <div class="app-grid">
-      <div class="seg-card green">
-        <div class="seg-thumb t1">🎬</div>
-        <div class="seg-info"><span class="seg-dur">4:23</span><span class="seg-stars">★★★★★</span></div>
-        <div class="seg-check">✓ Include</div>
-      </div>
-      <div class="seg-card amber">
-        <div class="seg-thumb t2">🎬</div>
-        <div class="seg-info"><span class="seg-dur">7:11</span><span class="seg-stars">★★★☆☆</span></div>
-        <div class="seg-check">✓ Include</div>
-      </div>
-      <div class="seg-card green">
-        <div class="seg-thumb t3">🎬</div>
-        <div class="seg-info"><span class="seg-dur">6:48</span><span class="seg-stars">★★★★☆</span></div>
-        <div class="seg-check">✓ Include</div>
-      </div>
-      <div class="seg-card red">
-        <div class="seg-thumb t4">🎬</div>
-        <div class="seg-info"><span class="seg-dur">2:05</span><span class="seg-stars">★☆☆☆☆</span></div>
-        <div class="seg-check">☐ Include</div>
-      </div>
+      <div class="seg-card green"><div class="seg-thumb t1"></div><div class="seg-info"><span class="seg-dur">4:23</span><span class="seg-stars">★★★★★</span></div><div class="seg-check">✓ Include</div></div>
+      <div class="seg-card amber"><div class="seg-thumb t2"></div><div class="seg-info"><span class="seg-dur">7:11</span><span class="seg-stars">★★★☆☆</span></div><div class="seg-check">✓ Include</div></div>
+      <div class="seg-card green"><div class="seg-thumb t3"></div><div class="seg-info"><span class="seg-dur">6:48</span><span class="seg-stars">★★★★☆</span></div><div class="seg-check">✓ Include</div></div>
+      <div class="seg-card red"><div class="seg-thumb t4"></div><div class="seg-info"><span class="seg-dur">2:05</span><span class="seg-stars">★☆☆☆☆</span></div><div class="seg-check">☐ Include</div></div>
     </div>
     <div class="app-footer">
       <div class="footer-dur">18:27 selected · Target: 18:00 – 20:00</div>
@@ -175,21 +215,9 @@
   <div class="section-label">How it works</div>
   <div class="section-title">Three steps to a tighter edit</div>
   <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-num">1</div>
-      <h3>Load your video</h3>
-      <p>Drag and drop any .mp4, .mov, .mkv, or .avi file — up to 120 minutes. Supports standard, VR, and 360° formats.</p>
-    </div>
-    <div class="step-card">
-      <div class="step-num">2</div>
-      <h3>Review auto-detected scenes</h3>
-      <p>Scene boundaries are found automatically. Each segment is scored by motion and audio energy, color-coded green to red.</p>
-    </div>
-    <div class="step-card">
-      <div class="step-num">3</div>
-      <h3>Export your edit</h3>
-      <p>Set a target duration, hit Auto-select, or pick segments manually. Export a clean, re-encoded video in one click.</p>
-    </div>
+    <div class="step-card"><div class="step-num">1</div><h3>Load your video</h3><p>Drag and drop any .mp4, .mov, .mkv, or .avi file — up to 120 minutes. Supports standard, VR, and 360° formats.</p></div>
+    <div class="step-card"><div class="step-num">2</div><h3>Review auto-detected scenes</h3><p>Scene boundaries are found automatically. Each segment is scored by motion and audio energy, color-coded green to red.</p></div>
+    <div class="step-card"><div class="step-num">3</div><h3>Export your edit</h3><p>Set a target duration, hit Auto-select, or pick segments manually. Export a clean, re-encoded video in one click.</p></div>
   </div>
 </section>
 
@@ -197,36 +225,12 @@
   <div class="section-label">Features</div>
   <div class="section-title">Built for working editors</div>
   <div class="features-grid">
-    <div class="feat-card">
-      <div class="feat-icon">🔒</div>
-      <h4>100% local processing</h4>
-      <p>Nothing leaves your machine. No uploads, no accounts, full privacy.</p>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🥽</div>
-      <h4>VR &amp; 360° support</h4>
-      <p>Detects and preserves spherical video metadata on export.</p>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">⚡</div>
-      <h4>Smart scoring</h4>
-      <p>Motion and audio energy scores help surface the most dynamic segments.</p>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🎯</div>
-      <h4>Target duration control</h4>
-      <p>Set an 18–20 min target and let the app select the best segments automatically.</p>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🍎</div>
-      <h4>macOS native</h4>
-      <p>Built with PySide6. Dark mode, keyboard shortcuts, drag-and-drop.</p>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🔄</div>
-      <h4>Regular updates</h4>
-      <p>Auto-checks for new versions on launch. One-click download when available.</p>
-    </div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><rect x="10" y="10" width="16" height="16" rx="3" stroke="#4a9eff" stroke-width="1.5"/><path d="M14 18h8M18 14v8" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round"/></svg><h4>100% local processing</h4><p>Nothing leaves your machine. No uploads, no accounts, full privacy.</p></div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><circle cx="18" cy="18" r="8" stroke="#4a9eff" stroke-width="1.5"/><path d="M10 18h16M18 10a8 8 0 010 16M18 10a8 8 0 000 16" stroke="#4a9eff" stroke-width="1.5"/></svg><h4>VR &amp; 360° support</h4><p>Detects and preserves spherical video metadata on export.</p></div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><path d="M10 22l4-6 4 4 3-4 5 6" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><h4>Smart scoring</h4><p>Motion and audio energy scores help surface the most dynamic segments.</p></div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><circle cx="18" cy="18" r="6" stroke="#4a9eff" stroke-width="1.5"/><path d="M18 12V10M18 26v-2M12 18h-2M26 18h-2" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Target duration control</h4><p>Set a target and let ClipTrim select the best segments automatically.</p></div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><rect x="10" y="13" width="16" height="10" rx="2" stroke="#4a9eff" stroke-width="1.5"/><path d="M14 13v-2M22 13v-2" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round"/></svg><h4>macOS native</h4><p>Dark mode, keyboard shortcuts, drag-and-drop. Windows coming soon.</p></div>
+    <div class="feat-card"><svg class="feat-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#1a2a3a"/><path d="M18 11v7l4 4" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round"/><path d="M25 13a8 8 0 11-11.3-.7" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Regular updates</h4><p>Auto-checks for new versions on launch. One-click download when available.</p></div>
   </div>
 </section>
 
@@ -234,9 +238,9 @@
   <h2>Ready to edit faster?</h2>
   <p>Free during beta. macOS only for now — Windows coming soon.</p>
   <div>
-    <button class="download-btn" data-download>
+    <button class="download-btn" onclick="window.open('https://github.com/roykim-maker/video-trimmer/releases/tag/v1.0.0')">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 8l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Download VideoTrimmer
+      Download ClipTrim
     </button>
   </div>
   <div class="download-meta">v1.0.0 · 405 MB · Requires macOS 11 or later</div>
@@ -248,71 +252,62 @@
 </section>
 
 <footer>
-  <p>© 2026 VideoTrimmer. All rights reserved.</p>
+  <div class="footer-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#1a2a3a"/>
+      <path d="M7 10h11" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M7 16h17" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M7 22h13" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M21 13l5 3-5 3V13z" fill="#4a9eff"/>
+    </svg>
+    <div class="footer-logo-text">Clip<span>Trim</span></div>
+  </div>
+  <p style="font-size:13px;color:#444;">© 2026 ClipTrim. All rights reserved.</p>
   <div class="footer-links">
-    <a href="#">GitHub</a>
     <a href="#">Privacy</a>
     <a href="#">Contact</a>
   </div>
 </footer>
 
-
-<div id="access-modal">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box">
-    <h3>Enter access code</h3>
-    <p>VideoTrimmer is in private beta. Enter your access code to download.</p>
-    <input id="modal-input" class="modal-input" type="text" placeholder="Access code" autocomplete="off" spellcheck="false" />
-    <div id="modal-error" class="modal-error"></div>
-    <div class="modal-actions">
-      <button class="modal-cancel" id="modal-cancel">Cancel</button>
-      <button class="modal-submit" id="modal-submit">Download</button>
-    </div>
-  </div>
-</div>
-
 <script>
-  const CORRECT_CODE = 'BETA2026';
-  const DOWNLOAD_URL = 'https://github.com/roykim-maker/video-trimmer/releases/download/v1.0.0/VideoTrimmer-v1.0.0-mac.zip';
-
   function openModal() {
-    document.getElementById('modal-input').value = '';
-    document.getElementById('modal-error').textContent = '';
-    document.getElementById('access-modal').style.display = 'flex';
-    document.getElementById('modal-input').focus();
+    document.getElementById('betaModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
-
   function closeModal() {
-    document.getElementById('access-modal').style.display = 'none';
+    document.getElementById('betaModal').classList.remove('active');
+    document.body.style.overflow = '';
   }
+  document.getElementById('betaModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
 
-  function attemptDownload() {
-    const val = document.getElementById('modal-input').value.trim();
-    if (val.toUpperCase() === CORRECT_CODE) {
-      closeModal();
-      const a = document.createElement('a');
-      a.href = DOWNLOAD_URL;
-      a.setAttribute('download', 'VideoTrimmer-v1.0.0-mac.zip');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      document.getElementById('modal-error').textContent = 'Invalid code — request access below';
-      document.getElementById('modal-input').focus();
+  document.getElementById('betaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    const data = new FormData(this);
+    try {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('modal-form-view').style.display = 'none';
+        document.getElementById('modal-success-view').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Send request';
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Send request';
+      alert('Something went wrong. Please try again.');
     }
-  }
-
-  document.querySelectorAll('[data-download]').forEach(function(el) {
-    el.addEventListener('click', openModal);
   });
-
-  document.getElementById('modal-submit').addEventListener('click', attemptDownload);
-  document.getElementById('modal-cancel').addEventListener('click', closeModal);
-  document.getElementById('modal-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') attemptDownload();
-    if (e.key === 'Escape') closeModal();
-  });
-  document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
 </script>
 </body>
 </html>
