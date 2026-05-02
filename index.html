@@ -6,6 +6,7 @@
 <title>VideoTrimmer — Cut long videos down to size</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  button { font-family: inherit; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e8e8e8; line-height: 1.6; }
   a { color: inherit; text-decoration: none; }
   nav { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 0.5px solid #222; position: sticky; top: 0; background: #0a0a0aee; backdrop-filter: blur(8px); z-index: 100; }
@@ -105,7 +106,7 @@
 
 <nav>
   <div class="nav-logo">Video<span>Trimmer</span></div>
-  <a href="https://github.com/roykim-maker/video-trimmer/releases/download/v1.0.0/VideoTrimmer-v1.0.0-mac.zip" download class="nav-cta">Download for macOS</a>
+  <button class="nav-cta" data-download>Download for macOS</button>
 </nav>
 
 <section class="hero">
@@ -113,10 +114,10 @@
   <h1>Cut long videos<br>down to size, <em>automatically</em></h1>
   <p>AI-powered scene detection helps video editors trim hours of footage to a target length in minutes — all processed locally on your machine.</p>
   <div class="hero-actions">
-    <a href="https://github.com/roykim-maker/video-trimmer/releases/download/v1.0.0/VideoTrimmer-v1.0.0-mac.zip" download class="btn-primary">
+    <button class="btn-primary" data-download>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 8l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download for macOS
-    </a>
+    </button>
     <button class="btn-secondary">View on GitHub</button>
   </div>
   <p class="hero-meta">405 MB · macOS 11+ · Free during beta</p>
@@ -233,10 +234,10 @@
   <h2>Ready to edit faster?</h2>
   <p>Free during beta. macOS only for now — Windows coming soon.</p>
   <div>
-    <a href="https://github.com/roykim-maker/video-trimmer/releases/download/v1.0.0/VideoTrimmer-v1.0.0-mac.zip" download class="download-btn">
+    <button class="download-btn" data-download>
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M8 1v10M4 8l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download VideoTrimmer
-    </a>
+    </button>
   </div>
   <div class="download-meta">v1.0.0 · 405 MB · Requires macOS 11 or later</div>
   <p class="email-label">Get notified when new versions drop</p>
@@ -272,20 +273,17 @@
 
 <script>
   const CORRECT_CODE = 'BETA2026';
-  let pendingUrl = null;
+  const DOWNLOAD_URL = 'https://github.com/roykim-maker/video-trimmer/releases/download/v1.0.0/VideoTrimmer-v1.0.0-mac.zip';
 
-  function openModal(url) {
-    pendingUrl = url;
+  function openModal() {
     document.getElementById('modal-input').value = '';
     document.getElementById('modal-error').textContent = '';
-    const modal = document.getElementById('access-modal');
-    modal.style.display = 'flex';
+    document.getElementById('access-modal').style.display = 'flex';
     document.getElementById('modal-input').focus();
   }
 
   function closeModal() {
     document.getElementById('access-modal').style.display = 'none';
-    pendingUrl = null;
   }
 
   function attemptDownload() {
@@ -293,8 +291,8 @@
     if (val.toUpperCase() === CORRECT_CODE) {
       closeModal();
       const a = document.createElement('a');
-      a.href = pendingUrl;
-      a.download = '';
+      a.href = DOWNLOAD_URL;
+      a.setAttribute('download', 'VideoTrimmer-v1.0.0-mac.zip');
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -304,11 +302,8 @@
     }
   }
 
-  document.querySelectorAll('a[download]').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      openModal(el.href);
-    });
+  document.querySelectorAll('[data-download]').forEach(function(el) {
+    el.addEventListener('click', openModal);
   });
 
   document.getElementById('modal-submit').addEventListener('click', attemptDownload);
